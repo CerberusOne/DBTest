@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         //create db
         db = new SQLiteDatabaseHelper(this);
+        db.printLogs();
         //listView = (ListView)findViewById(R.id.listView);
         ImageClass img1 = new ImageClass("caterham", 2017, 10, 4);
         ImageClass img2 = new ImageClass("audi", 2014, 1, 4);
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         //InsertData(img2);
         //InsertData(img3);
 
-        imageTest = (ImageView)findViewById(R.id.imageTest);
+        //imageTest = (ImageView)findViewById(R.id.imageTest);
 
         //ignore Uri excpeption
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();

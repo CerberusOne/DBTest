@@ -16,7 +16,7 @@ import java.util.Date;
 public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public final String TAG = "SQLiteDatabaseHelper";
     public static final String DATABASE_NAME = "photos.db";
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 4;
     public static final String TABLE_NAME = "photos_table";
     public static final String COL0 = "ID";
     public static final String COL1 = "NAME";
@@ -29,7 +29,7 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
 
     public SQLiteDatabaseHelper(Context context) {
-        super(context, TABLE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
                 COL3 + " INTEGER, "  +
                 COL4 + " INTEGER, " +
                 COL5 + " INTEGER, " +
-                COL6 + " INTEGER," +
+                COL6 + " INTEGER, " +
                 COL7 + " TEXT" +")");
     }
 
@@ -50,6 +50,22 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COL7 + " TEXT");
         onCreate(db);
+    }
+
+    public void printLogs() {
+        Cursor cursor = getAllData();
+
+        if (cursor != null && cursor.moveToFirst()) {
+            for(int i = 0; cursor.moveToNext(); i++) {
+                Log.d(TAG, "ID: " + cursor.getString(0));
+                Log.d(TAG, "NAME: " + cursor.getString(1));
+                Log.d(TAG, "YEAR: " + cursor.getString(2));
+                Log.d(TAG, "MONTH: " + cursor.getString(3));
+                Log.d(TAG, "DAY: " + cursor.getString(4));
+                //Log.d(TAG, "ID: " + cursor.getString(0));
+
+            }
+        }
     }
 
     //user format: db.insert("filename", "2017-10-05 13:00:00");
