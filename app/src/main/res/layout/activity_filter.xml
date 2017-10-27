@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.aingaran.dbtest.FilterActivity">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Filter Options:"
+        android:textSize="30sp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="16dp" />
+
+    <EditText
+        android:id="@+id/keywordInput"
+        android:layout_width="152dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="Enter a Keyword"
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="85dp" />
+
+    <EditText
+        android:id="@+id/locationInput"
+        android:layout_width="152dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="Enter a Location"
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="85dp" />
+
+    <Button
+        android:id="@+id/locationButton"
+        android:layout_width="152dp"
+        android:layout_height="48dp"
+        android:text="Add Location"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="127dp" />
+
+    <Button
+        android:id="@+id/keywordButton"
+        android:layout_width="152dp"
+        android:layout_height="48dp"
+        android:text="Add Keyword"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="127dp" />
+
+    <ListView
+        android:layout_width="152dp"
+        android:layout_height="227dp"
+        tools:layout_editor_absoluteX="9dp"
+        tools:layout_editor_absoluteY="205dp" />
+
+    <ListView
+        android:layout_width="152dp"
+        android:layout_height="227dp"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="205dp" />
+
+</android.support.constraint.ConstraintLayout>
