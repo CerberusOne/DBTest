@@ -14,14 +14,18 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
+    public final String TAG = "SQLiteDatabaseHelper";
     public static final String DATABASE_NAME = "photos.db";
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 6;
     public static final String TABLE_NAME = "photos_table";
     public static final String COL0 = "ID";
     public static final String COL1 = "NAME";
     public static final String COL2 = "YEAR";
     public static final String COL3 = "MONTH";
     public static final String COL4 = "DAY";
+    public static final String COL5 = "LAT";
+    public static final String COL6 = "LONG";
+    public static final String COL7 = "CAPTION";
 
 
     public SQLiteDatabaseHelper(Context context) {
@@ -36,28 +40,39 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
                 COL1 + " TEXT, " +
                 COL2 + " INTEGER, " +
                 COL3 + " INTEGER, "  +
-                COL4 + " INTEGER" + ")");
+                COL4 + " INTEGER, " +
+                COL5 + " INTEGER, " +
+                COL6 + " INTEGER," +
+                COL7 + " TEXT" +")");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //db.execSQL("DROP IF TABLE EXISTS " + TABLE_NAME);
-        //onCreate(db);
+        db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COL7 + " TEXT");
+        onCreate(db);
     }
 
     //user format: db.insert("filename", "2017-10-05 13:00:00");
-    public boolean insertData(ImageClass img) {
+    public boolean insertData(String name, int year, int month, int day, int lat, int lon, String caption) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(COL1, img.getName());
-        Log.d("SQLiteDatabaseHelper", "inserting: " + img.getName() + ": " + img.getYear() +
-                                                " " + img.getMonth() + " " + img.getDay()
-                                                    + "to " + TABLE_NAME);
+        Log.d(TAG, "Inserting name " + name);
+        Log.d(TAG, "Inserting year " + year);
+        Log.d(TAG, "Inserting month " + month);
+        Log.d(TAG, "Inserting day " + day);
+        Log.d(TAG, "Inserting lat " + lat);
+        Log.d(TAG, "Inserting lon " + lon);
+        Log.d(TAG, "Inserting caption " + caption);
 
-        values.put(COL2, img.getYear());
-        values.put(COL3, img.getMonth());
-        values.put(COL4, img.getDay());
+        values.put(COL1, name);
+        values.put(COL2, year);
+        values.put(COL3, month);
+        values.put(COL4, day);
+        values.put(COL5, lat);
+        values.put(COL6, lon);
+        values.put(COL7, caption);
+
 
         long insertId = db.insert(TABLE_NAME, null, values);
         db.close();

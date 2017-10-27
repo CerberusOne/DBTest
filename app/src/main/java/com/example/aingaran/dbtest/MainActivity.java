@@ -28,6 +28,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,15 +80,6 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setVmPolicy(builder.build());
 
         createListView();
-    }
-
-    public void InsertData(ImageClass img) {
-        boolean insertData = db.insertData(img);
-
-        if(insertData)
-            toastMessage("Data Successfully Inserted");
-        else
-            toastMessage("Something went wrong");
     }
 
     private void toastMessage(String message) {
@@ -145,19 +137,36 @@ public class MainActivity extends AppCompatActivity {
         double latVal = 0, longVal = 0;
         String latString = null, longString = null;
         String filepath = PATH;
-        Intent tagIntent = new Intent(this, TaggingActivity.class);
 
+        //send filepath to tagging activity
+        Intent tagIntent = new Intent(this, TaggingActivity.class);
+        tagIntent.putExtra("imagePath", PATH);
+
+        if((requestCode == PICTURE) && (resultCode == RESULT_OK)) {
+            //File io
+            File imageFile = new File(PATH);
+            if(imageFile.exists()){
+                //save a bitmap of the photo just  taken
+                Bitmap bitmap = BitmapFactory.decodeFile(PATH);
+            }
+        }
+
+        //start the tagging activity
+        startActivity(tagIntent);
+
+/*
         //check for camera results
         if ((requestCode == PICTURE) && (resultCode == RESULT_OK)) {
             File imageFile = new File(filepath );
             if(imageFile.exists()) {
+                //save file
                 Bitmap bitmap = BitmapFactory.decodeFile(filepath);
+
+                //modify file for viewing
                 int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
                 Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
 
-
                 intent.putExtra("photo", bitmap);
-
 
                 imageTest.setImageBitmap(scaled);
                 imageTest.setRotation(90);
@@ -166,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                     ExifInterface exifInterface = new ExifInterface(filepath );
                     date = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
                     Log.d(TAG, "Date: " + date);
-
+*/
 /*                  //deprecated getLatLong(float [])
                     if(exifInterface.getLatLong(latLong)) {
                         latVal = latLong[0];
@@ -179,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     //latString = exifInterface.getAttribute(ExifInterface.TAG_GPS_DEST_LATITUDE);
                     //longString = exifInterface.getAttribute(ExifInterface.TAG_GPS_DEST_LONGITUDE);
 */
-
+/*
                     //using new double getLatLong
                     final double[] latLongDouble = exifInterface.getLatLong();
                     if(latLongDouble != null) {
@@ -190,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Log.d(TAG, "LatLong failed");
                     }
-
+*/
 /*                  //creating location tag upon photo capture, work around to exifinterface
                     //check the permissions for location tracking
                     int permissionCheck;
@@ -216,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
                         latVal = 46.1;
                     }
 */
+/*
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -225,12 +235,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                //Go to tag screen
-                startActivity(tagIntent);
-
 
             }
         }
+*/
     }
 }
 
