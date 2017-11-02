@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -69,21 +71,36 @@ public class TaggingActivity extends AppCompatActivity {
         img.setCaption(caption);
     }
 
-    public void addTimestamp(View view) throws ParseException {
+    public void addTimestamp(View view) {
         try {
             exifInterface = new ExifInterface(img.getName());
             date = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
             Log.d(TAG, "date: " + date);
-            String[] splitWhitespace = date.split(" ");
-            String[] splitDates = splitWhitespace[0].split(":");
 
-            img.setYear(Integer.parseInt(splitDates[0]));
-            img.setMonth(Integer.parseInt(splitDates[1]));
-            img.setDay(Integer.parseInt(splitDates[2]));
+            if(date == null) {
+                date = new SimpleDateFormat("yyyy:MM:dd").format(new Date());
+                //String[] splitWhitespace = date.split(" ");
+                String[] splitDates = date.split(":");
 
-            Log.d(TAG, "Year: " + img.getYear());
-            Log.d(TAG, "Month: " + img.getMonth());
-            Log.d(TAG, "Day: " + img.getDay());
+                img.setYear(Integer.parseInt(splitDates[0]));
+                img.setMonth(Integer.parseInt(splitDates[1]));
+                img.setDay(Integer.parseInt(splitDates[2]));
+
+                Log.d(TAG, "Year: " + img.getYear());
+                Log.d(TAG, "Month: " + img.getMonth());
+                Log.d(TAG, "Day: " + img.getDay());
+            } else {
+                String[] splitWhitespace = date.split(" ");
+                String[] splitDates = splitWhitespace[0].split(":");
+
+                img.setYear(Integer.parseInt(splitDates[0]));
+                img.setMonth(Integer.parseInt(splitDates[1]));
+                img.setDay(Integer.parseInt(splitDates[2]));
+
+                Log.d(TAG, "Year: " + img.getYear());
+                Log.d(TAG, "Month: " + img.getMonth());
+                Log.d(TAG, "Day: " + img.getDay());
+            }
         }  catch (IOException e) {
             e.printStackTrace();
         }

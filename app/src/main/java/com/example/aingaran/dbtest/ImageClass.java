@@ -2,11 +2,13 @@ package com.example.aingaran.dbtest;
 
 import android.content.Context;
 
+import java.io.Serializable;
+
 /**
  * Created by Aingaran on 2017-10-05.
  */
 
-public class ImageClass {
+public class ImageClass implements Serializable {
     private String name;
     private int year, month, day, lat, lon;
     private String caption;

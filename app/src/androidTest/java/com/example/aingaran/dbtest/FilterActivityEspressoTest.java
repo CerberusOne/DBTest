@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
@@ -26,6 +27,16 @@ public class FilterActivityEspressoTest {
             new ActivityTestRule<>(MainActivity.class);
 
     @Test
+    public void testCaptionInput() {
+        String test = "captionTest";
+        onView(withId(R.id.filterButton)).perform(click());
+        onView(withId(R.id.caption)).perform(click());
+        onView(withId(R.id.caption)).check(matches(withText("")));
+        onView(withId(R.id.caption)).perform(replaceText(test));
+        onView(withId(R.id.caption)).check(matches(withText(test)));
+    }
+/*
+    @Test
     public void ensureTextChangesWork() {
         // Type text and then press the button.
         onView(withId(R.id.keywordInput))
@@ -35,6 +46,7 @@ public class FilterActivityEspressoTest {
         // Check that the text was changed.
         onView(withId(R.id.keywordInput)).check(matches(withText("Lalala")));
     }
+*/
 /*
     @Test
     public void changeText_newActivity() {

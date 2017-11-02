@@ -37,6 +37,7 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     String filepath;
     ArrayList<ImageClass> gallery;
     ImageView imageView;
-    int currImage;
+    int currImage = 0;
     File imageFile;
 
 
@@ -99,11 +100,13 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle filterGallery = getIntent().getExtras();
         if(filterGallery != null) {
-            boolean isFiltered = filterGallery.getBoolean("filterGallery", false);
+            boolean isFiltered = filterGallery.getBoolean("filterGallery", true);
             if(isFiltered){
-
+                gallery = (ArrayList<ImageClass>) getIntent().getSerializableExtra("filterGallery");
+                setupImage(gallery.get(currImage));
             }
-        } else{
+        }
+        else{
             setupGallery();
         }
     }
@@ -155,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void toFilter(View view) {
         Intent intent = new Intent(this, FilterActivity.class);
+        intent.putExtra("gallery", gallery);
         startActivity(intent);
     }
 

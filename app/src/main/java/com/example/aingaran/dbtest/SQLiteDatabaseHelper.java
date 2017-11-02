@@ -153,23 +153,16 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
         //cursor.moveToFirst();
         Log.d(TAG, "Cursor size: " +cursor.getCount());
-/*
-        if(cursor.getCount() == 1) {
-            img = new ImageClass();
-            img.setName(cursor.getString(1));
-            img.setYear(Integer.parseInt(cursor.getString(2)));
-            img.setMonth(Integer.parseInt(cursor.getString(3)));
-            img.setDay(Integer.parseInt(cursor.getString(4)));
-            list.add(img);
-            Log.d(TAG, "getting: " + img.getName());
-        }
-*/
+
         while(cursor.moveToNext()) {
             img = new ImageClass();
             img.setName(cursor.getString(1));
             img.setYear(Integer.parseInt(cursor.getString(2)));
             img.setMonth(Integer.parseInt(cursor.getString(3)));
             img.setDay(Integer.parseInt(cursor.getString(4)));
+            img.setLat(Integer.parseInt(cursor.getString(5)));
+            img.setLon(Integer.parseInt(cursor.getString(6)));
+            img.setCaption(cursor.getString(7));
             list.add(img);
             Log.d(TAG, "getting: " + img.getName());
         }

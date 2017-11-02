@@ -20,6 +20,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 public class MainActivityEspresso {
     @Rule
     public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(MainActivity.class);
+
 /*
     @Test
     public void ensureTextChangesWork() {
