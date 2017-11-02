@@ -1,7 +1,10 @@
 package com.example.aingaran.dbtest;
 
 import android.Manifest;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -9,7 +12,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 //import android.media.ExifInterface;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Environment;
 import android.support.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -18,6 +23,7 @@ import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,21 +37,32 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.example.aingaran.dbtest.SQLiteDatabaseHelper.TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSIONS = 100;
     SQLiteDatabaseHelper db;
-    private ListView listView;
 
     static final int PICTURE = 1;
-    static final String PATH = "/sdcard/test.jpg";
-    ImageView imageTest;
-    String TAG = this.getClass().getSimpleName();
+    static final String TEMP_DIR = "/PhotoGalleryApp";
+    static final String TEMP_NAME = "/galleryTest";
+    static final String EXTENTION = ".jpg";
+    static final String ROOT_DIR = "/sdcard";
+    final String TAG = this.getClass().getSimpleName();
+    String filepath;
+    ArrayList<ImageClass> gallery;
+    ImageView imageView;
+    int currImage;
+    File imageFile;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -53,63 +70,42 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Camera permissions
-        requestPermissions(new String[] {Manifest.permission.CAMERA,
+        //location permissions
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS);
-
-        //location permissions
-        ActivityCompat.requestPermissions(this, new
-                String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1); //set location permissions
 
         //create db
         db = new SQLiteDatabaseHelper(this);
         db.printLogs();
-        //listView = (ListView)findViewById(R.id.listView);
-        ImageClass img1 = new ImageClass("caterham", 2017, 10, 4);
-        ImageClass img2 = new ImageClass("audi", 2014, 1, 4);
-        ImageClass img3 = new ImageClass("pagani", 1999, 3, 17);
 
-        //InsertData(img1);
-        //InsertData(img2);
-        //InsertData(img3);
-
-        //imageTest = (ImageView)findViewById(R.id.imageTest);
+        //create PhotoGallery folder if doesn't exist
+        File folder = new File(ROOT_DIR + TEMP_DIR);
+        if(!folder.exists()) {
+            if(folder.mkdir())
+                Log.d(TAG, "Created PhotoGallery directory");
+            else
+                Log.d(TAG, "failed to create PhotoGallery directory");
+        } else {
+            Log.d(TAG, "Failed to create PhotoGallery directory");
+        }
 
         //ignore Uri excpeption
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
-        createListView();
-    }
+        imageView = findViewById(R.id.imageView);
 
-    private void toastMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
+        Bundle filterGallery = getIntent().getExtras();
+        if(filterGallery != null) {
+            boolean isFiltered = filterGallery.getBoolean("filterGallery", false);
+            if(isFiltered){
 
-    public void createListView() {
-        ArrayList<ImageClass> list = new ArrayList<>();
-        ArrayList<String> listNames = new ArrayList<>();
-
-/*
-        Cursor cursor = db.getAllData();
-        while(cursor.moveToNext()) {
-            list.add(cursor.getString(1));
+            }
+        } else{
+            setupGallery();
         }
-*/
-/*
-        //filter data by date
-        //list = db.TimeFilter(2016, 2018);
-        list = db.TimeFilterList(2016, 2018);
-        for(int i = 0; i < list.size()-1; i++) {
-            listNames.add(list.get(i).getName());
-        }
-
-        Log.d("MainActivity", Arrays.toString(list.toArray()));
-
-        ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listNames);
-        listView.setAdapter(adapter);
-        */
     }
 
     public void toCamera (View view) {
@@ -117,129 +113,91 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         //save photo to GalleryApp/Photos
-        Uri uriSavedImage = Uri.fromFile(new File(PATH));
+        filepath = genPath();
+        imageFile = new File(filepath);
+        Uri uriSavedImage = Uri.fromFile(imageFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
 
         //start camera intent
-        startActivityForResult(intent, PICTURE);
-
+        if(intent.resolveActivity(getPackageManager()) != null){
+            startActivityForResult(intent, PICTURE);
+        }
     }
 
-
-    //send bitmap data to tagging activity
-        //use tagging activity to save the photo to the database
-            //name will be the id + photo
-        //use tagging activity to get date and location
-        //use tagging activity to save to database
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        String date = null;
-        float[] latLong = null;
-        double latVal = 0, longVal = 0;
-        String latString = null, longString = null;
-        String filepath = PATH;
+        Log.d(TAG, "Temp filepath: " + filepath);
 
         //send filepath to tagging activity
         Intent tagIntent = new Intent(this, TaggingActivity.class);
-        tagIntent.putExtra("imagePath", PATH);
+        tagIntent.putExtra("imagePath", filepath);
 
         if((requestCode == PICTURE) && (resultCode == RESULT_OK)) {
-            //File io
-            File imageFile = new File(PATH);
             if(imageFile.exists()){
                 //save a bitmap of the photo just  taken
-                Bitmap bitmap = BitmapFactory.decodeFile(PATH);
+                Bitmap bitmap = BitmapFactory.decodeFile(filepath);
             }
         }
 
         //start the tagging activity
         startActivity(tagIntent);
+    }
 
-/*
-        //check for camera results
-        if ((requestCode == PICTURE) && (resultCode == RESULT_OK)) {
-            File imageFile = new File(filepath );
-            if(imageFile.exists()) {
-                //save file
-                Bitmap bitmap = BitmapFactory.decodeFile(filepath);
+    private String genPath() {
+        String name;
+        String time;
 
-                //modify file for viewing
-                int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
-                Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
+        time = new SimpleDateFormat("yyyMMdd_HHmmss").format(new Date());
+        name = ROOT_DIR + TEMP_DIR + TEMP_NAME + time + EXTENTION;
 
-                intent.putExtra("photo", bitmap);
+        return name;
+    }
 
-                imageTest.setImageBitmap(scaled);
-                imageTest.setRotation(90);
+    public void toFilter(View view) {
+        Intent intent = new Intent(this, FilterActivity.class);
+        startActivity(intent);
+    }
 
-                try{
-                    ExifInterface exifInterface = new ExifInterface(filepath );
-                    date = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
-                    Log.d(TAG, "Date: " + date);
-*/
-/*                  //deprecated getLatLong(float [])
-                    if(exifInterface.getLatLong(latLong)) {
-                        latVal = latLong[0];
-                        longVal = latLong[1];
-                        Log.d(TAG, "Lat: " + latVal);
-                        Log.d(TAG, "Long: " + longVal);
-                    } else {
-                        Log.d(TAG, "getLatLong Failed");
-                    }
-                    //latString = exifInterface.getAttribute(ExifInterface.TAG_GPS_DEST_LATITUDE);
-                    //longString = exifInterface.getAttribute(ExifInterface.TAG_GPS_DEST_LONGITUDE);
-*/
-/*
-                    //using new double getLatLong
-                    final double[] latLongDouble = exifInterface.getLatLong();
-                    if(latLongDouble != null) {
-                        latVal = latLongDouble[0];
-                        longVal = latLongDouble[1];
-                        Log.d(TAG, "Lat: " + latVal);
-                        Log.d(TAG, "Long: " + longVal);
-                    } else {
-                        Log.d(TAG, "LatLong failed");
-                    }
-*/
-/*                  //creating location tag upon photo capture, work around to exifinterface
-                    //check the permissions for location tracking
-                    int permissionCheck;
-                    permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION );
-
-                    //only provide location if permission was granted
-                    if(permissionCheck == PERMISSION_GRANTED) {
-                        LocationManager lm = (LocationManager) MainActivity.this.getSystemService(MainActivity.this.LOCATION_SERVICE);
-                        //Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            longVal = location.getLongitude();
-                            latVal = location.getLatitude();
-                            Log.d(TAG, "Lat: " + latVal);
-                            Log.d(TAG, "Long: " + longVal);
-                        } else {
-                            Log.d(TAG, "No Location");
-                        }
-                    }
-                    else{
-                        Log.d(TAG, "No Location permission");
-                        longVal = 46.1;
-                        latVal = 46.1;
-                    }
-*/
-/*
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                //ImageClass img = new ImageClass(filepath , year)
-
-
-
-
-
-            }
+    public void setupGallery() {
+        currImage = 0;
+        gallery = new ArrayList<>();
+        gallery = db.getGallery();
+        if(gallery.size() > 0) {
+            setupImage(gallery.get(currImage));
         }
-*/
+    }
+
+    public void setupImage(ImageClass img) {
+        Log.d(TAG, "opening: " + img.getName());
+        Bitmap bitmap = BitmapFactory.decodeFile(img.getName());
+        int hscale = (int) (bitmap.getHeight() * (512.0/bitmap.getWidth()));    //height scale
+        Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, hscale, true);
+        imageView.setImageBitmap(scaled);
+        //imageView.setRotation(90);
+        db.printLogs();
+    }
+
+    public void nextImage(View view) {
+        if((currImage + 1) < gallery.size()) {
+            currImage++;
+            Log.d(TAG, "Current Image: " + gallery.get(currImage).getName());
+            setupImage(gallery.get(currImage));
+        } else{
+            Toast toast = Toast.makeText(this, "Already last image", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
+
+    public void prevImage(View view) {
+        if((currImage - 1) >= 0) {
+            currImage--;
+            Log.d(TAG, "Current Image: " + db.getGallery().get(currImage).getName());
+            setupImage(db.getGallery().get(currImage));
+        } else{
+            Toast toast = Toast.makeText(this, "Already first image", Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 }
+
 

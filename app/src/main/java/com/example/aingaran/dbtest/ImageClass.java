@@ -8,48 +8,62 @@ import android.content.Context;
 
 public class ImageClass {
     private String name;
-    private int year;
-    private int month;
-    private int day;
+    private int year, month, day, lat, lon;
+    private String caption;
 
     public ImageClass() {}
 
-    public ImageClass(String name, int year, int month, int day) {
+    public ImageClass(String name, int year, int month, int day, int lat, int lon, String caption) {
         this.name = name;
         this.year = year;
         this.month = month;
         this.day = day;
+        this.lat = lat;
+        this.lon = lon;
+        this.caption = caption;
     }
 
-    void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    void setYear(int year) {
+    public void setYear(int year) {
         this.year = year;
     }
 
-    void setMonth(int month) {
+    public void setMonth(int month) {
         this.month = month;
     }
 
-    void setDay(int day) {
+    public void setDay(int day) {
         this.day = day;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-    int getYear() {
+    public int getYear() {
         return year;
     }
 
-    int getMonth() {
+    public int getMonth() {
         return month;
     }
 
-    int getDay() {
+    public int getDay() {
         return day;
     }
+
+    public int getLat() { return lat; }
+
+    public void setLat(int lat) { this.lat = lat; }
+
+    public int getLon() { return lon; }
+
+    public void setLon(int lon) { this.lon = lon; }
+
+    public String getCaption() { return caption; }
+
+    public void setCaption(String caption) { this.caption = caption; }
 }

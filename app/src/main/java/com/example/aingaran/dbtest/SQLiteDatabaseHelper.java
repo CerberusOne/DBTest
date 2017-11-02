@@ -55,15 +55,25 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public void printLogs() {
         Cursor cursor = getAllData();
 
+        Log.d(TAG, "ID: " + "\t"
+                + "NAME: " + "\t"
+                + "YEAR: " + "\t"
+                + "MONTH: " + "\t"
+                + "DAY: " + "\t"
+                + "LAT: " + "\t"
+                + "LONG: " + "\t"
+                + "CAPTION: ");
+
         if (cursor != null && cursor.moveToFirst()) {
             for(int i = 0; cursor.moveToNext(); i++) {
-                Log.d(TAG, "ID: " + cursor.getString(0));
-                Log.d(TAG, "NAME: " + cursor.getString(1));
-                Log.d(TAG, "YEAR: " + cursor.getString(2));
-                Log.d(TAG, "MONTH: " + cursor.getString(3));
-                Log.d(TAG, "DAY: " + cursor.getString(4));
-                //Log.d(TAG, "ID: " + cursor.getString(0));
-
+                Log.d(TAG, cursor.getString(0) + "\t"
+                        + cursor.getString(1) + "\t"
+                        + cursor.getString(2) + "\t"
+                        + cursor.getString(3) + "\t"
+                        + cursor.getString(4) + "\t"
+                        + cursor.getString(5) + "\t"
+                        + cursor.getString(6) + "\t"
+                        + cursor.getString(7));
             }
         }
     }
@@ -89,8 +99,9 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
         values.put(COL6, lon);
         values.put(COL7, caption);
 
-
         long insertId = db.insert(TABLE_NAME, null, values);
+        Log.d(TAG, "Inserted: " + insertId);
+
         db.close();
 
         //return insertId != -1;
@@ -135,6 +146,37 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public ArrayList<ImageClass> getGallery() {
+        Cursor cursor = getAllData();
+        ArrayList<ImageClass> list = new ArrayList<>();
+        ImageClass img = new ImageClass();
+
+        //cursor.moveToFirst();
+        Log.d(TAG, "Cursor size: " +cursor.getCount());
+/*
+        if(cursor.getCount() == 1) {
+            img = new ImageClass();
+            img.setName(cursor.getString(1));
+            img.setYear(Integer.parseInt(cursor.getString(2)));
+            img.setMonth(Integer.parseInt(cursor.getString(3)));
+            img.setDay(Integer.parseInt(cursor.getString(4)));
+            list.add(img);
+            Log.d(TAG, "getting: " + img.getName());
+        }
+*/
+        while(cursor.moveToNext()) {
+            img = new ImageClass();
+            img.setName(cursor.getString(1));
+            img.setYear(Integer.parseInt(cursor.getString(2)));
+            img.setMonth(Integer.parseInt(cursor.getString(3)));
+            img.setDay(Integer.parseInt(cursor.getString(4)));
+            list.add(img);
+            Log.d(TAG, "getting: " + img.getName());
+        }
+
+        return list;
+    }
+
     public ArrayList<ImageClass> TimeFilterList(int syear, int eyear) {
         Cursor cursor = getAllData();
         ArrayList<ImageClass> filteredList = new ArrayList<>();
@@ -154,5 +196,17 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
         }
 
         return filteredList;
+    }
+
+    public int count() {
+        int count = 0;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + TABLE_NAME, null);
+        cursor.moveToFirst();
+        for(count = 0; !cursor.isAfterLast(); count++) {}
+
+        db.close();
+        return count;
     }
 }
